@@ -72,7 +72,7 @@ const CompanionForm = () => {
                         </FormItem>
                     )}
                 />
-                
+
                 <FormField
                     control={form.control}
                     name="subject"
@@ -207,7 +207,7 @@ const CompanionForm = () => {
                     )}
                 />
 
-                 <Button type="submit" className="w-full cursor-pointer">Build Your Companion</Button>
+                <Button type="submit" className="w-full cursor-pointer">Build Your Companion</Button>
             </form>
         </Form>
     )
