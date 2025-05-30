@@ -23,7 +23,7 @@ export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }:
 
     let query = supabase.from('companions').select();
 
-    if(subject && topic) {
+    if(subject && topic) { 
         query = query.ilike('subject', `%${subject}%`)
             .or(`topic.ilike.%${topic}%,name.ilike.%${topic}%`)
     } else if(subject) {
@@ -32,7 +32,7 @@ export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }:
         query = query.or(`topic.ilike.%${topic}%,name.ilike.%${topic}%`)
     }
 
-    query = query.range((page - 1) * limit, page * limit - 1);
+    query = query.range((page - 1) * limit, page * limit - 1); // 0-9 10-19
 
     const { data: companions, error } = await query;
 
