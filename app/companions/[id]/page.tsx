@@ -1,3 +1,4 @@
+import CompanionComponent from '@/components/CompanionComponent';
 import { getCompanion } from '@/lib/actions/companions.actions';
 import { getSubjectColor } from '@/lib/utils';
 import { currentUser } from '@clerk/nextjs/server';
@@ -19,10 +20,10 @@ const CompanionSession = async ({ params }: ComapanionSessionPageProps) => {
 
 
     return (
-      <main>
+        <main>
             <article className="flex rounded-border justify-between p-6 max-md:flex-col">
                 <div className="flex items-center gap-2">
-                    <div className="size-[72px] flex items-center justify-center rounded-lg max-md:hidden" style={{ backgroundColor: getSubjectColor(companion.subject)}}>
+                    <div className="size-[72px] flex items-center justify-center rounded-lg max-md:hidden" style={{ backgroundColor: getSubjectColor(companion.subject) }}>
                         <Image src={`/icons/${companion.subject}.svg`} alt={companion.subject} width={35} height={35} />
                     </div>
 
@@ -43,12 +44,12 @@ const CompanionSession = async ({ params }: ComapanionSessionPageProps) => {
                 </div>
             </article>
 
-            {/* <CompanionComponent
+            <CompanionComponent
                 {...companion}
                 companionId={id}
                 userName={user.firstName!}
                 userImage={user.imageUrl!}
-            /> */}
+            />
         </main>
     )
 }
