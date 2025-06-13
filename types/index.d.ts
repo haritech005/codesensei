@@ -6,16 +6,18 @@ type User = {
 };
 
 enum Subject {
-  maths = "maths",
-  language = "language",
-  science = "science",
-  history = "history",
-  coding = "coding",
-  geography = "geography",
-  economics = "economics",
-  finance = "finance",
-  business = "business",
+  DataStructuresAndAlgorithms = "DSA",
+  OperatingSystem = "Operating-System",
+  DBMS = "DBMS",
+  ComputerNetworks = "Computer-Networks",
+  SystemDesign = "System-Design",
+  Frontend = "Frontend",
+  Backend = "Backend",
+  SQL = "SQL",
+  DevOps = "DevOps",
+  CSFundamentals = "CS-Fundamentals"
 }
+
 
 type Companion = Models.DocumentList<Models.Document> & {
   $id: string;

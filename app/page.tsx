@@ -10,7 +10,7 @@ const Page = async () => {
 
   return (
     <main>
-      <h1>Popular Companions</h1>
+      <h1>Featured Mentors </h1>
 
       <section className="home-section">
 
@@ -27,7 +27,7 @@ const Page = async () => {
 
       <section className="home-section mb-7">
         <CompanionsList
-          title="Recently completed Lessons"
+          title="Your Recent Activities"
           companions={recentSessionsCompanion}
           classNames={"w-2/3 max-lg:w-full"}
         />
@@ -37,7 +37,6 @@ const Page = async () => {
       </section>
 
     </main>
-
   )
 }
 
