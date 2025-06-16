@@ -10,7 +10,7 @@ const Page = async () => {
 
   return (
     <main>
-      <h1>Featured Mentors </h1>
+      <h1>Featured Modules </h1>
 
       <section className="home-section">
 

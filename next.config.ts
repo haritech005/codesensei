@@ -20,7 +20,7 @@ export default withSentryConfig(nextConfig, {
 // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
 org: "haritech",
-project: "converso",
+project: "CodeSensei",
 
 // Only print logs for uploading source maps in CI
 silent: !process.env.CI,
