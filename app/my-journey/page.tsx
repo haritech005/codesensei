@@ -4,7 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import {
   getUserCompanions,
@@ -14,12 +14,16 @@ import Image from "next/image";
 import CompanionsList from "@/components/CompanionsList";
 
 const Profile = async () => {
-  const user = await currentUser();
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const [user, companions, sessionHistory] = await Promise.all([
+    currentUser(),
+    getUserCompanions(userId),
+    getUserSessions(userId),
+  ]);
 
   if (!user) redirect("/sign-in");
-
-  const companions = await getUserCompanions(user.id);
-  const sessionHistory = await getUserSessions(user.id);
 
   return (
     <main className="min-lg:w-3/4">

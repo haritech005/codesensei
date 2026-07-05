@@ -3,16 +3,19 @@ import CompanionsList from "@/components/CompanionsList"
 import CTA from "@/components/ui/CTA"
 import { getAllCompanions, getUserCompanions, getUserSessions } from "@/lib/actions/companions.actions"
 import { getSubjectColor } from "@/lib/utils"
-import { currentUser } from "@clerk/nextjs/server"
+import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation";
 
 
 const Page = async () => {
 
-  const user = await currentUser();
-  if (!user) redirect("/sign-in");
-  const companions = await getAllCompanions({ limit: 3 })
-  const recentSessionsCompanion = await getUserSessions(user.id);
+  const { userId } = await auth();
+  if (!userId) redirect("/sign-in");
+
+  const [companions, recentSessionsCompanion] = await Promise.all([
+    getAllCompanions({ limit: 3 }),
+    getUserSessions(userId)
+  ]);
 
   return (
     <main>
