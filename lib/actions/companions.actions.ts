@@ -19,9 +19,12 @@ import { revalidatePath } from "next/cache";
 }
 
 export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }: GetAllCompanions) => {
+    const { userId } = await auth();
+    if (!userId) return [];
+
     const supabase = createSupabaseClient();
 
-    let query = supabase.from('companions').select();
+    let query = supabase.from('companions').select().eq('author', userId);
 
     if(subject && topic) { 
         query = query.ilike('subject', `%${subject}%`)
