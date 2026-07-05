@@ -18,7 +18,7 @@ const Page = async () => {
     <main>
       <h1>Featured Modules </h1>
 
-      <section className="home-section">
+      <section className="companions-grid">
 
         {companions.map((companion) => (
           <CompanionCard
