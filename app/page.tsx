@@ -1,7 +1,7 @@
 import CompanionCard from "@/components/CompanionCard"
 import CompanionsList from "@/components/CompanionsList"
 import CTA from "@/components/ui/CTA"
-import { getAllCompanions, getUserCompanions, getUserSessions } from "@/lib/actions/companions.actions"
+import { getAllCompanions, getUserCompanions, getUserSessions, getBookmarkedCompanions } from "@/lib/actions/companions.actions"
 import { getSubjectColor } from "@/lib/utils"
 import { auth } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation";
@@ -12,10 +12,13 @@ const Page = async () => {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const [companions, recentSessionsCompanion] = await Promise.all([
+  const [companions, recentSessionsCompanion, bookmarkedCompanions] = await Promise.all([
     getAllCompanions({ limit: 3 }),
-    getUserSessions(userId)
+    getUserSessions(userId),
+    getBookmarkedCompanions(userId)
   ]);
+
+  const bookmarkedIds = new Set(bookmarkedCompanions.map((c: any) => c.id));
 
   return (
     <main>
@@ -28,6 +31,8 @@ const Page = async () => {
             key={companion.id}
             {...companion}
             color={getSubjectColor(companion.subject)}
+            isBookmarked={bookmarkedIds.has(companion.id)}
+            path="/"
           />
         ))}
 

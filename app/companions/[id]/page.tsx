@@ -1,26 +1,32 @@
 import CompanionComponent from '@/components/CompanionComponent';
-import { getCompanion } from '@/lib/actions/companions.actions';
+import BookmarkButton from '@/components/BookmarkButton';
+import { getCompanion, getBookmarkedCompanions } from '@/lib/actions/companions.actions';
 import { getSubjectColor } from '@/lib/utils';
-import { currentUser } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import React from 'react'
+
 interface ComapanionSessionPageProps {
     params: Promise<{ id: string }>
-
 }
 
 const CompanionSession = async ({ params }: ComapanionSessionPageProps) => {
     const { id } = await params;
 
-    const [companion, user] = await Promise.all([
+    const { userId } = await auth();
+    if (!userId) redirect("/sign-in");
+
+    const [companion, user, bookmarkedCompanions] = await Promise.all([
         getCompanion(id),
-        currentUser()
+        currentUser(),
+        getBookmarkedCompanions(userId)
     ]);
 
     if (!user) redirect("/sign-in");
-    if (!companion) redirect("/companions")
+    if (!companion) redirect("/companions");
 
+    const isBookmarked = bookmarkedCompanions.some((c: any) => c.id === companion.id);
 
     return (
         <main>
@@ -38,12 +44,16 @@ const CompanionSession = async ({ params }: ComapanionSessionPageProps) => {
                             <div className="subject-badge max-sm:hidden">
                                 {companion.subject}
                             </div>
+                            <div className="md:hidden">
+                                <BookmarkButton companionId={id} initialBookmarked={isBookmarked} path={`/companions/${id}`} />
+                            </div>
                         </div>
                         <p className="text-lg">{companion.topic}</p>
                     </div>
                 </div>
-                <div className="items-start text-2xl max-md:hidden">
-                    {companion.duration ? `${companion.duration} minutes` : ''}
+                <div className="flex items-center gap-4 max-md:hidden">
+                    {companion.duration ? <div className="text-2xl">{companion.duration} minutes</div> : ''}
+                    <BookmarkButton companionId={id} initialBookmarked={isBookmarked} path={`/companions/${id}`} />
                 </div>
             </article>
 

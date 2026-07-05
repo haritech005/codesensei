@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import {
   getUserCompanions,
   getUserSessions,
+  getBookmarkedCompanions,
 } from "../../lib/actions/companions.actions";
 import Image from "next/image";
 import CompanionsList from "@/components/CompanionsList";
@@ -17,10 +18,11 @@ const Profile = async () => {
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const [user, companions, sessionHistory] = await Promise.all([
+  const [user, companions, sessionHistory, bookmarkedCompanions] = await Promise.all([
     currentUser(),
     getUserCompanions(userId),
     getUserSessions(userId),
+    getBookmarkedCompanions(userId),
   ]);
 
   if (!user) redirect("/sign-in");
@@ -69,10 +71,12 @@ const Profile = async () => {
       <Accordion type="multiple">
         <AccordionItem value="bookmarks">
           <AccordionTrigger className="text-2xl font-bold">
+            Bookmarked Companions {`(${bookmarkedCompanions.length})`}
           </AccordionTrigger>
           <AccordionContent>
             <CompanionsList
               title="Bookmarked Companions"
+              companions={bookmarkedCompanions}
             />
           </AccordionContent>
         </AccordionItem>
