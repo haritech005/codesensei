@@ -1,7 +1,7 @@
 import CompanionCard from "@/components/CompanionCard"
 import CompanionsList from "@/components/CompanionsList"
 import CTA from "@/components/ui/CTA"
-import { getAllCompanions, getUserCompanions } from "@/lib/actions/companions.actions"
+import { getAllCompanions, getUserCompanions, getUserSessions } from "@/lib/actions/companions.actions"
 import { getSubjectColor } from "@/lib/utils"
 import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation";
@@ -12,7 +12,7 @@ const Page = async () => {
   const user = await currentUser();
   if (!user) redirect("/sign-in");
   const companions = await getAllCompanions({ limit: 3 })
-  const recentSessionsCompanion = await getUserCompanions(user.id);
+  const recentSessionsCompanion = await getUserSessions(user.id);
 
   return (
     <main>

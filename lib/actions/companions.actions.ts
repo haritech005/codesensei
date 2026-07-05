@@ -85,14 +85,29 @@ export const getUserSessions = async (userId: string, limit = 10) => {
     const supabase = createSupabaseClient();
     const { data, error } = await supabase
         .from('session_history')
-        .select(`companions:companion_id (*)`)
+        .select(`companion_id, companions:companion_id (*)`)
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit)
+        .order('created_at', { ascending: false });
 
     if(error) throw new Error(error.message);
+    if (!data) return [];
 
-    return data.map(({ companions }) => companions);
+    const uniqueCompanions: any[] = [];
+    const seenCompanionIds = new Set<string>();
+
+    for (const session of data) {
+        // Handle TypeScript type checking when accessing the joined companions relation
+        const companion: any = session.companions;
+        if (companion && !seenCompanionIds.has(companion.id)) {
+            seenCompanionIds.add(companion.id);
+            uniqueCompanions.push(companion);
+            if (uniqueCompanions.length >= limit) {
+                break;
+            }
+        }
+    }
+
+    return uniqueCompanions;
 }
 
 export const getUserCompanions = async (userId: string) => {
