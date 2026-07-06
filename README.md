@@ -1,35 +1,35 @@
-# 🎓 CodeSensei: Real-Time AI Vocal Coding Companions
+# CodeSensei: Real-Time AI Vocal Coding Companions
 
-CodeSensei is an interactive, voice-first learning platform designed to help developers master Core Computer Science subjects and coding interviews. Built with Next.js 15, Vapi AI (WebRTC), Supabase, and Clerk, CodeSensei allows users to create customized AI vocal companions tailored to specific technical subjects, target speaking styles, and difficulty levels, conducting mock-interviews and learning sessions directly in the browser.
-
----
-
-## 🚀 Key Features
-
-*   🗣️ **Real-Time Voice Sessions:** Interactive voice-first coding lessons powered by **Vapi AI WebRTC SDK** with ultra-low latency, real-time speech-to-text transcripts, and dynamic soundwave animations (Lottie).
-*   🛠️ **Custom Companion Creation:** Provision custom mentors by selecting technical subjects (DSA, System Design, Operating Systems, Computer Networks, Frontend, Backend, etc.), speaking tones (casual, formal), and gendered voice models.
-*   🔒 **Workspace Scoping:** Private workspace isolation. Companions and user history are strictly scoped to the authenticated user via Supabase Row-Level Security (RLS).
-*   📌 **Optimistic Bookmarking:** Instant companion bookmarking using React transitions (`useTransition`) for zero-latency user feedback.
-*   📊 **Progress & Analytics Dashboard:** View complete session history, lessons completed, custom companions created, and bookmarked mentors.
-*   🔋 **Self-Healing Cron Keep-Alive:** Automated serverless keep-alive endpoint (`/api/ping`) triggered via Vercel Crons to query Supabase every 3 days, preventing automatic database pausing.
+CodeSensei is an interactive, voice-first learning platform designed to help developers master Computer Science fundamentals and prepare for technical coding interviews. Built using Next.js 15, Vapi AI (WebRTC), Supabase, and Clerk, CodeSensei enables users to provision customized AI vocal companions tailored to specific technical subjects, target speaking styles, and custom voice models, facilitating mock-interviews and technical walkthroughs directly within the browser.
 
 ---
 
-## 🛠️ Technology Stack
+## Key Features
+
+*   **Real-Time Voice Sessions:** Interactive voice-first coding lessons powered by the Vapi AI WebRTC SDK featuring low latency, real-time speech-to-text transcripts, and dynamic soundwave visualizations.
+*   **Custom Companion Provisioning:** Create custom mentors by configuring technical subjects (such as DSA, System Design, Operating Systems, Computer Networks, Frontend, Backend, etc.), speaking styles (casual, formal), and specific voice models.
+*   **Secure Workspace Scoping:** Private workspace isolation. Companions and user history are strictly scoped to the authenticated user using Supabase Row-Level Security (RLS) policies.
+*   **Optimistic Bookmarking UI:** Instant companion bookmarking using React transitions (`useTransition`) for immediate visual feedback and zero-latency states.
+*   **User Dashboard & History Tracking:** View progress metrics including lessons completed, custom companions created, and bookmarked mentors.
+*   **Automated Keep-Alive Engine:** Scheduled serverless endpoint (`/api/ping`) executed via Vercel Crons every 3 days to keep the free-tier Supabase database active and prevent automatic pause triggers.
+
+---
+
+## Technology Stack
 
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Frontend** | Next.js 15 (App Router), React 19, TypeScript | Server components, routing, modern state management |
-| **Styling** | Tailwind CSS v4, Radix UI Primitives | Responsive visual layouts, interactive UI accordions |
-| **Real-Time Voice** | `@vapi-ai/web`, WebRTC | Dual-channel real-time vocal communication and overrides |
-| **Auth & Security** | Clerk Authentication | Identity management and custom JWT generation |
-| **Database** | Supabase (PostgreSQL) | Structured storage, relations, and row-level access control |
-| **Monitoring** | Sentry (Client, Server, Edge) | Full-stack error tracking and performance profiling |
+| **Frontend** | Next.js 15 (App Router), React 19, TypeScript | Server components, static optimization, and modular state management |
+| **Styling** | Tailwind CSS v4, Radix UI Primitives | Responsive layouts, accessible UI components, and design tokens |
+| **Real-Time Voice** | `@vapi-ai/web`, WebRTC | Dual-channel real-time vocal communication and parameter overrides |
+| **Auth & Security** | Clerk Authentication | Session handling, user management, and JWT claim signatures |
+| **Database** | Supabase (PostgreSQL) | Relational storage, indexing, and Row-Level Security |
+| **Monitoring** | Sentry (Client, Server, Edge) | Full-stack error tracing and performance monitoring |
 | **Automation** | Vercel Cron Jobs | Keep-alive service execution and security validation |
 
 ---
 
-## 📐 Architecture & Database Design
+## Architecture & Database Design
 
 ### Database Schema Relationships
 
@@ -65,21 +65,21 @@ erDiagram
 
 ---
 
-## 🧠 Engineering Highlights & Architectural Solutions
+## Technical Highlights & Engineering Decisions
 
 ### 1. Clerk-Supabase Custom JWT Mapping & RLS Type Casting Workaround
-**The Problem:** Supabase's built-in `auth.uid()` function casts the JWT's `sub` claim into a UUID. However, Clerk uses text-based user IDs (e.g. `user_2xi...`). Directly using standard Supabase templates resulted in casting failures (`invalid input syntax for type uuid`) and crashed queries.
-**The Solution:** Customized Row Level Security (RLS) policies to bypass the default UUID helper, parsing the Clerk string ID directly from the JWT claims:
+**The Challenge:** Supabase's native `auth.uid()` function implicitly casts the JWT's `sub` claim into a UUID. Because Clerk issues text-based user IDs (e.g. `user_2xi...`), utilizing default templates resulted in database casting errors (`invalid input syntax for type uuid`).
+**The Solution:** Implemented customized PostgreSQL RLS policies that bypass the standard UUID parser, extracting the text-based Clerk user ID directly from the JWT claims:
 ```sql
 -- Custom RLS policy using text-based ID matching
 ((select auth.jwt()) ->> 'sub') = author
 ```
-This enabled secure row-level access control without database modifications.
+This configuration secures tables without requiring schema type overrides.
 
 ### 2. Eliminating Query Waterfalls via Parallel Server Fetching
-To maximize performance and keep server load times sub-200ms:
-*   Replaced serial data fetching with concurrent parallelized query resolution (`Promise.all`).
-*   Replaced heavy external Clerk API requests (`currentUser()`) with localized header token decryption (`auth()`) where appropriate to avoid blocking initial renders.
+To improve performance and keep page load times under 200ms:
+*   Parallelized page-level data fetching utilizing concurrent JavaScript promises (`Promise.all`).
+*   Replaced blocking external API user calls (`currentUser()`) with localized header token signatures (`auth()`) to expedite server-side rendering.
 ```typescript
 // Parallel query optimization
 const [companions, recentSessionsCompanion, bookmarkedCompanions] = await Promise.all([
@@ -90,8 +90,8 @@ const [companions, recentSessionsCompanion, bookmarkedCompanions] = await Promis
 ```
 
 ### 3. Vercel-Secured Database Heartbeat Daemon
-**The Problem:** Free-tier Supabase databases auto-pause after 7 days of inactivity, disrupting portfolio visibility for recruiters.
-**The Solution:** Built a serverless keep-alive route (`/api/ping`) executed automatically every 3rd day via Vercel Crons. In production, the endpoint is protected by verifying the internal Vercel Authorization header:
+**The Challenge:** Free-tier Supabase instances auto-pause after 7 days of inactivity, creating deployment availability issues.
+**The Solution:** Configured a serverless keep-alive route (`/api/ping`) triggered automatically every 3 days by Vercel Crons. In production, this endpoint is secured by validating the incoming bearer signature:
 ```typescript
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
 
 ---
 
-## ⚙️ Environment Variables
+## Environment Variables
 
 Create a `.env` file in the root directory and configure the following parameters:
 
@@ -130,7 +130,7 @@ CRON_SECRET=your_vercel_cron_secret_key
 
 ---
 
-## 🏃 Getting Started
+## Getting Started
 
 ### 1. Install Dependencies
 ```bash
